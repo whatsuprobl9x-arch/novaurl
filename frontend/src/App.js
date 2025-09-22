@@ -260,6 +260,21 @@ function App() {
     }
   }, []);
 
+  // Show redirecting screen for short URLs
+  if (isRedirecting) {
+    return (
+      <div className="App">
+        <div className="main-container">
+          <div className="redirecting-screen">
+            <div className="spinner"></div>
+            <h2>Redirecting...</h2>
+            <p>Processing your request...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       <div className="main-container">
