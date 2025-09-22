@@ -107,15 +107,18 @@ user_problem_statement: "Create NOVAURL - a dark webpage with URL shortening fun
 backend:
   - task: "URL Creation API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented POST /api/urls endpoint with form data handling for redirect_url, discord_webhook, and optional custom_html file upload. Generates random short codes and stores in MongoDB."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: URL creation API works perfectly. Successfully creates URLs with redirect_url and discord_webhook. HTML file upload functionality works correctly with proper validation (rejects non-HTML files). Generated short codes are unique and properly stored in MongoDB."
 
   - task: "Discord Webhook Integration"
     implemented: true
