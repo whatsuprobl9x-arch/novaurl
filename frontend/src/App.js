@@ -255,10 +255,40 @@ function App() {
       const shortCode = currentPath.substring(1); // Remove leading slash
       setIsRedirecting(true);
       
-      // Redirect to backend for short URL handling
-      window.location.href = `${BACKEND_URL}${currentPath}`;
+      // Handle short URL redirect through API
+      handleShortURLRedirect(shortCode);
     }
   }, []);
+
+  const handleShortURLRedirect = async (shortCode) => {
+    try {
+      // Make API call to handle the short URL visit
+      const response = await axios.get(`${API}/redirect/${shortCode}`, {
+        headers: {
+          'X-Forwarded-For': 'unknown', // Will be replaced by actual IP at proxy level
+          'User-Agent': navigator.userAgent
+        }
+      });
+      
+      if (response.data && response.data.redirect_url) {
+        // Show loading page briefly, then redirect
+        setTimeout(() => {
+          window.location.href = response.data.redirect_url;
+        }, 2000);
+      } else {
+        // Short URL not found, redirect to home
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error handling short URL:', error);
+      // Redirect to home on error
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    }
+  };
 
   // Show redirecting screen for short URLs
   if (isRedirecting) {
