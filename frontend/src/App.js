@@ -238,10 +238,27 @@ const ManageURLsModal = ({ isOpen, onClose }) => {
 function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleURLCreated = (newUrl) => {
     console.log('URL created:', newUrl);
   };
+
+  // Check if current path is a short URL pattern and handle redirect
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    
+    // Check if path matches short URL pattern (8 alphanumeric characters)
+    const shortUrlPattern = /^\/[a-zA-Z0-9]{8}$/;
+    
+    if (shortUrlPattern.test(currentPath)) {
+      const shortCode = currentPath.substring(1); // Remove leading slash
+      setIsRedirecting(true);
+      
+      // Redirect to backend for short URL handling
+      window.location.href = `${BACKEND_URL}${currentPath}`;
+    }
+  }, []);
 
   return (
     <div className="App">
