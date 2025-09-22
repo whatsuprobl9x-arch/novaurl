@@ -167,15 +167,18 @@ backend:
 
   - task: "URL Management API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented GET /api/urls for listing all URLs and DELETE /api/urls/{short_code} for URL deletion."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: URL management API works perfectly. GET /api/urls returns proper list of all URLs with complete data (id, short_code, redirect_url, discord_webhook, created_at, click_count, custom_html). DELETE /api/urls/{short_code} successfully removes URLs and returns 404 for non-existent URLs."
 
 frontend:
   - task: "Dark Theme UI"
